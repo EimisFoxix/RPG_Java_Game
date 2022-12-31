@@ -9,31 +9,32 @@ import java.awt.geom.AffineTransform;
 import javax.swing.JPanel;
 
 import entity.Player;
+import tile.TileManager;
 
 public class GameWindow extends JPanel implements Runnable{
 	final int originalTileSize = 16; //16x16 pixels
 	final int scale = 2; //scale up the tiles for higher resolution screens
 	
 	public final int tileSize = originalTileSize * scale;
-	final int maximumWindowColumns = 36;
-	final int maximumWindowRows = 36;
-	final int screenWidth = tileSize * maximumWindowColumns;
-	final int screenHeight = tileSize * maximumWindowRows;
+	public final int maximumWindowColumns = 32;
+	public final int maximumWindowRows = 24;
+	public final int screenWidth = tileSize * maximumWindowColumns;
+	public final int screenHeight = tileSize * maximumWindowRows;
+	public final int maxWorldColumns = 160; //32
+	public final int maxWorldRows = 72;
+	public final int worldWidth = tileSize*maxWorldColumns;
+	public final int worldHeight = tileSize*maxWorldRows;
 	
 	
 	int FPS = 165; //Set FPS for the game
 	KeyHandler buttonPressed = new KeyHandler();
+	TileManager tiles = new TileManager(this);
 	Thread gameThread;
-	Player player = new Player(this,buttonPressed);
+	public checkCollision collisionChecker = new checkCollision(this);
+	public Player player = new Player(this,buttonPressed);
 	
 	//setPlayer's default position;
 	int realFPS;
-	double UpScale, DownScale, LeftScale, RightScale;
-	int PlayerX = screenWidth/2;
-	int PlayerY = screenHeight/2;
-	int MovementSpeed = 4;
-	float PlayerMovementScale = 1;
-	int PlayerSpeed = (int)(MovementSpeed * PlayerMovementScale);
 	
 	public GameWindow() {
 		this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -93,7 +94,7 @@ public class GameWindow extends JPanel implements Runnable{
 				timer = 0;
 			}
 			
-			calculateAcceleration(buttonPressed);
+			player.calculateAcceleration(buttonPressed);
 			
 		}
 		// TODO Auto-generated method stub
@@ -101,7 +102,7 @@ public class GameWindow extends JPanel implements Runnable{
 	}
 	public void update() {
 		//
-		player.update(UpScale,DownScale,LeftScale,RightScale);
+		player.update();
 		
 	}
 	public void paintComponent(Graphics g) {
@@ -109,6 +110,8 @@ public class GameWindow extends JPanel implements Runnable{
 		super.paintComponent(g);
 		
 		Graphics2D g2 = (Graphics2D)g;
+		
+		tiles.draw(g2);
 		
 		player.draw(g2);
 		
@@ -118,80 +121,7 @@ public class GameWindow extends JPanel implements Runnable{
 		
 		g2.drawString("FPS:" + realFPS, 3, 13);
 		
-		g2.drawString("W: " + UpScale, 3, 33);
-		
-		g2.drawString("S: " + DownScale, 3, 53);
-		
-		g2.drawString("A: " + LeftScale, 3, 73);
-		
-		g2.drawString("D: " + RightScale, 3, 93);
-		
 		g2.dispose();
 	}
-	public void calculateAcceleration(KeyHandler buttonPressed) {
-		
-		double grip = player.getGrip();
-		
-		if(buttonPressed.up == true) {
-			if(UpScale < 1) {
-				UpScale += grip;
-			}
-			if(DownScale>0) {
-				DownScale -= grip*1.5;
-			}
-		}
-		else if(buttonPressed.up == false) {
-			if(UpScale > 0) {
-				UpScale -= grip;
-			}
-		}
-		
-		if(buttonPressed.down == true) {
-			if(DownScale < 1) {
-				DownScale += grip;
-			}
-			if(UpScale>0) {
-				UpScale -= grip*1.5;
-			}
-		}
-		else if(buttonPressed.down == false) {
-			if(DownScale > 0) {
-				DownScale -= grip;
-			}
-		}
-		
-		if(buttonPressed.left == true) {
-			if(LeftScale < 1) {
-				LeftScale += grip;
-			}
-			if(RightScale>0) {
-				RightScale -= grip*1.5;
-			}
-		}
-		else if(buttonPressed.left == false) {
-			if(LeftScale > 0) {
-				LeftScale -= grip;
-			}
-		}
-		
-		if(buttonPressed.right == true) {
-			if(RightScale < 1) {
-				RightScale += grip;
-			}
-			if(LeftScale > 0) {
-				LeftScale -= grip*1.5;
-			}
-		}
-		else if(buttonPressed.right == false) {
-			if(RightScale > 0) {
-				RightScale -= grip;
-			}
-		}
-		
-		//Limitations
-		if(UpScale < 0) {UpScale = 0;} else if(UpScale>1) {UpScale = 1;}
-		if(DownScale < 0) {DownScale = 0;} else if(DownScale>1) {DownScale = 1;}
-		if(LeftScale < 0) {LeftScale = 0;} else if(LeftScale>1) {LeftScale = 1;}
-		if(RightScale < 0) {RightScale = 0;} else if(RightScale>1) {RightScale = 1;}
-	}
+	
 }
