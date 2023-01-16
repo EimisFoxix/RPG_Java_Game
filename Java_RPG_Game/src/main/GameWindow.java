@@ -9,32 +9,30 @@ import java.awt.geom.AffineTransform;
 import javax.swing.JPanel;
 
 import entity.Player;
-import object.Super_Object;
 import tile.TileManager;
 
 public class GameWindow extends JPanel implements Runnable{
 	final int originalTileSize = 16; //16x16 pixels
 	final int scale = 2; //scale up the tiles for higher resolution screens
 	
-	final int tileSize = originalTileSize * scale;
-	final int maximumWindowColumns = 32;
-	final int maximumWindowRows = 24;
-	final int screenWidth = tileSize * maximumWindowColumns;
-	final int screenHeight = tileSize * maximumWindowRows;
-	final int maxWorldColumns = 160; //32
-	final int maxWorldRows = 72;
-	final int worldWidth = tileSize*maxWorldColumns;
-	final int worldHeight = tileSize*maxWorldRows;
+	public final int tileSize = originalTileSize * scale;
+	public final int maximumWindowColumns = 32;
+	public final int maximumWindowRows = 24;
+	public final int screenWidth = tileSize * maximumWindowColumns;
+	public final int screenHeight = tileSize * maximumWindowRows;
+	public final int maxWorldColumns = 160; //32
+	public final int maxWorldRows = 72;
+	public final int worldWidth = tileSize*maxWorldColumns;
+	public final int worldHeight = tileSize*maxWorldRows;
+	
 	
 	int FPS = 165; //Set FPS for the game
 	KeyHandler buttonPressed = new KeyHandler();
 	TileManager tiles = new TileManager(this);
-	public UI ui = new UI(this);
 	Thread gameThread;
 	public checkCollision collisionChecker = new checkCollision(this);
-	public ObjectSetter obj_Setter = new ObjectSetter(this);
 	public Player player = new Player(this,buttonPressed);
-	public Super_Object obj[] = new Super_Object[10];
+	
 	//setPlayer's default position;
 	int realFPS;
 	
@@ -45,12 +43,9 @@ public class GameWindow extends JPanel implements Runnable{
 		this.addKeyListener(buttonPressed);
 		this.setFocusable(true); //Allows window to be focused in order to read keyboard inputs
 	}
-	
-	public void setupGame() {
-		obj_Setter.setObject();
-	}
 
 	public void startGameThread() {
+		
 		gameThread = new Thread(this);
 		gameThread.start();
 	}
@@ -118,40 +113,15 @@ public class GameWindow extends JPanel implements Runnable{
 		
 		tiles.draw(g2);
 		
-		for(int i = 0; i<obj.length; i++) {
-			if(obj[i] != null) {
-				obj[i].draw(g2, this);
-			}
-		}
-		
 		player.draw(g2);
-		
-		ui.draw(g2);
 		
 		g2.setColor(Color.white);
 		
 		g2.setTransform(AffineTransform.getScaleInstance(2.5, 2.5));
 		
+		g2.drawString("FPS:" + realFPS, 3, 13);
+		
 		g2.dispose();
-	}
-	public int getTileSize() {
-		return tileSize;
-	}
-	
-	public int getMaxWorldColumns() {
-		return maxWorldColumns;
-	}
-	
-	public int getMaxWorldRows() {
-		return maxWorldRows;
-	}
-	
-	public int getScreenWidth() {
-		return screenWidth;
-	}
-	
-	public int getScreenHeight() {
-		return screenHeight;
 	}
 	
 }
