@@ -18,6 +18,7 @@ public class Main {
 		window.setLocationRelativeTo(null); //Open window in the middle of the screen
 		window.setVisible(true); //Make the window visible
 		
+		gameWindow.setupGame();
 		gameWindow.startGameThread(); 
 	}
 }
