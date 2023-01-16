@@ -11,37 +11,86 @@ import javax.imageio.ImageIO;
 
 import main.GameWindow;
 import main.KeyHandler;
+import object.Super_Object;
 
 public class Player extends Entity{
 	GameWindow gw;
 	KeyHandler buttonPressed;
 	double speedScale;
 	String lastDirection;
-	double grip;
-	
-	public final int screenX;
-	public final int screenY;
-	
+	double grip,old_grip;
+	int map[][];
+	final int screenX;
+	final int screenY;
+	int AmountOfKeys = 0;
+	int AmountOfBombs = 0;
 	
 	public Player(GameWindow gw, KeyHandler buttonPressed) {
 		this.gw = gw;
 		this.buttonPressed = buttonPressed;
 		
-		screenX = gw.screenWidth/2-gw.tileSize;
-		screenY = gw.screenHeight/2-gw.tileSize;
+		screenX = gw.getScreenWidth()/2-gw.getTileSize();
+		screenY = gw.getScreenHeight()/2-gw.getTileSize();
 		
-		collisionArea = new Rectangle(16,16,32,32);
+		collisionArea = new Rectangle(16,16,32,32); //x,y,width,height
+		
+		collisionAreaDefaultX = collisionArea.x;
+		collisionAreaDefaultY = collisionArea.y;
 		
 		setValues();
 		getPlayerImages();
+		
 	}
 	public void setValues() {
-		worldX = gw.tileSize * 15;
-		worldY = gw.tileSize * 59;
+		worldX = gw.getTileSize() * 15;
+		worldY = gw.getTileSize() * 59;
 		direction = "down";
 		speedScale = 1;
 		speed = (int)(3 * speedScale);
 		grip = 0.005;
+		old_grip = 0.005;
+	}
+	
+	public void changeKeyAmount(int change) {
+		AmountOfKeys += change;
+	}
+	
+	public void changeBombAmount(int change) {
+		AmountOfBombs += change;
+	}
+	
+	public int getKeyAmount() {
+		return AmountOfKeys;
+	}
+	
+	public int getBombAmount() {
+		return AmountOfBombs;
+	}
+	
+	public int getScreenX() {
+		return screenX;
+	}
+	
+	public int getScreenY() {
+		return screenY;
+	}
+	
+	public void changeSpeed(double change) {
+		speedScale += change;
+		speed = (int)(3*speedScale);
+	}
+	
+	public void changeGrip(double change) {
+		old_grip += change;
+	}
+	
+	public void changeGripOnFloor(boolean add) {
+		if(add == true) {
+			grip=0.5;
+		}
+		else {
+			grip=old_grip;
+		}
 	}
 	
 	public void getPlayerImages() {
@@ -91,6 +140,11 @@ public class Player extends Entity{
 		collisionOn = false;
 		gw.collisionChecker.checkTile(this,buttonPressed); 
 		
+		int objIndex = gw.collisionChecker.checkObject(this, true);
+		pickUpObject(objIndex);
+		
+		gw.collisionChecker.checkType(this);
+		
 		if(collisionOn == false) {
 			if(playerMoving()) {
 				if(buttonPressed.up == true || UpScale > 0) {
@@ -119,6 +173,24 @@ public class Player extends Entity{
 		}
 	}
 	}
+
+	public void pickUpObject(int i) {
+		if(i!=999) { //checking if Object was touched
+
+			gw.obj[i].updatePlayer(this);
+
+			gw.ui.showMessage(gw.obj[i].getMessage());
+			
+			if(gw.obj[i].checkForRemoval() == true) {
+				gw.obj[i] = null;
+			}
+		}
+	}
+	
+	void deleteObject(Super_Object obj[]) {	
+		obj = null;
+	}
+	
 	public void draw(Graphics2D g2) {
 		
 		BufferedImage image = null;
@@ -157,21 +229,21 @@ public class Player extends Entity{
 			}
 			break;
 		}
-		g2.drawImage(image, screenX, screenY, gw.tileSize*2, gw.tileSize*2, null);
+		g2.drawImage(image, screenX, screenY, gw.getTileSize()*2, gw.getTileSize()*2, null);
 		
 		g2.setColor(Color.white);
 		
 		g2.setTransform(AffineTransform.getScaleInstance(2.5, 2.5));
 		
-		g2.drawString("W: " + UpScale, 3, 33);
+		g2.drawString("W: " + UpScale, 3, 73);
 		
-		g2.drawString("S: " + DownScale, 3, 53);
+		g2.drawString("S: " + DownScale, 3, 93);
 		
-		g2.drawString("A: " + LeftScale, 3, 73);
+		g2.drawString("A: " + LeftScale, 3, 113);
 		
-		g2.drawString("D: " + RightScale, 3, 93);
+		g2.drawString("D: " + RightScale, 3, 133);
 		
-		g2.drawString("Direction: " + direction, 3, 113);
+		g2.drawString("Direction: " + direction, 3, 153);		
 	}
 	
 	
